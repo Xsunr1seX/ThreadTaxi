@@ -2,38 +2,41 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Введите количество такси: ");
+        int taxiCount = scanner.nextInt();
+
+        System.out.print("Введите количество заказов: ");
+        int orderCount = scanner.nextInt();
+
+        if (taxiCount <= 0 || orderCount <= 0) {
+            System.out.println("Количество должно быть больше 0");
+            return;
+        }
+
+
+        OrderGenerator generator = getOrderGenerator(taxiCount, orderCount);
+        generator.start();
+
+        System.out.println("\n Система запущена");
+    }
+
+    private static OrderGenerator getOrderGenerator(int taxiCount, int orderCount) {
         BlockingQueue<Order> queue = new LinkedBlockingQueue<>();
         List<Taxi> taxis = new ArrayList<>();
 
-        Taxi t1 = new Taxi(1, taxis);
-        Taxi t2 = new Taxi(2, taxis);
-        Taxi t3 = new Taxi(3, taxis);
-
-        taxis.add(t1);
-        taxis.add(t2);
-        taxis.add(t3);
-
-        t1.start();
-        t2.start();
-        t3.start();
+        for (int i = 1; i <= taxiCount; i++) {
+            Taxi taxi = new Taxi(i, taxis);
+            taxis.add(taxi);
+            taxi.start();
+        }
 
         Dispatcher dispatcher = new Dispatcher(queue, taxis);
         dispatcher.start();
 
-
-        for (int i = 1; i <= 10; i++) {
-            Order o = new Order(
-                    i,
-                    (int)(Math.random() * 50),
-                    (int)(Math.random() * 50),
-                    (int)(Math.random() * 50),
-                    (int)(Math.random() * 50)
-            );
-
-            queue.put(o);
-            Thread.sleep(200);
-        }
+        return new OrderGenerator(queue, 300, orderCount);
     }
 }

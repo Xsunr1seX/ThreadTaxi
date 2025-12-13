@@ -25,7 +25,7 @@ public class Dispatcher extends Thread {
                     }
                 }
 
-                // назначаем заказ
+
                 chosenTaxi.assignOrder(order);
 
             } catch (InterruptedException e) {

@@ -5,6 +5,7 @@ public class Order {
     private final int toX;
     private final int toY;
 
+
     public Order(int id, int fromX, int fromY, int toX, int toY) {
         this.id = id;
         this.fromX = fromX;
@@ -12,6 +13,11 @@ public class Order {
         this.toX = toX;
         this.toY = toY;
     }
+
+
+
+
+
     public int getId() { return id; }
     public int getFromX() { return fromX; }
     public int getFromY() { return fromY; }
