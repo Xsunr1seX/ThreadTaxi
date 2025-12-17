@@ -1,9 +1,11 @@
+package taxi;
+
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main {
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Введите количество такси: ");
@@ -17,26 +19,30 @@ public class Main {
             return;
         }
 
-
-        OrderGenerator generator = getOrderGenerator(taxiCount, orderCount);
-        generator.start();
-
-        System.out.println("\n Система запущена");
-    }
-
-    private static OrderGenerator getOrderGenerator(int taxiCount, int orderCount) {
         BlockingQueue<Order> queue = new LinkedBlockingQueue<>();
+        AtomicBoolean shutdown = new AtomicBoolean(false);
+        CountDownLatch doneLatch = new CountDownLatch(orderCount);
+
         List<Taxi> taxis = new ArrayList<>();
 
         for (int i = 1; i <= taxiCount; i++) {
-            Taxi taxi = new Taxi(i, taxis);
+            Taxi taxi = new Taxi(i, taxis, doneLatch, shutdown);
             taxis.add(taxi);
             taxi.start();
         }
 
-        Dispatcher dispatcher = new Dispatcher(queue, taxis);
+        Dispatcher dispatcher = new Dispatcher(queue, taxis, orderCount, doneLatch, shutdown);
         dispatcher.start();
 
-        return new OrderGenerator(queue, 300, orderCount);
+        OrderGenerator generator = new OrderGenerator(queue, 300, orderCount);
+        generator.start();
+
+        System.out.println("\nСистема запущена\n");
+
+        generator.join();
+        dispatcher.join();
+        for (Taxi t : taxis) t.join();
+
+        System.out.println("\nВсе потоки завершены. Завершение программы.");
     }
 }

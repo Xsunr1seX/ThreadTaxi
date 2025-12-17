@@ -1,8 +1,9 @@
+package taxi;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class OrderGenerator extends Thread {
-
     private final BlockingQueue<Order> queue;
     private final int delayMs;
     private final int countOrders;
@@ -19,7 +20,6 @@ public class OrderGenerator extends Thread {
     public void run() {
         try {
             for (int i = 0; i < countOrders; i++) {
-
                 Order order = generateOrder();
                 queue.put(order);
 
@@ -32,11 +32,10 @@ public class OrderGenerator extends Thread {
                 Thread.sleep(delayMs);
             }
 
-
+            queue.put(Order.poisonPill());
             System.out.println("Генератор создал все " + countOrders + " заказов и завершился");
 
         } catch (InterruptedException e) {
-            System.out.println("Генератор был прерван");
             Thread.currentThread().interrupt();
         }
     }
@@ -46,7 +45,6 @@ public class OrderGenerator extends Thread {
         int fromY = randCoord();
         int toX = randCoord();
         int toY = randCoord();
-
         return new Order(orderId++, fromX, fromY, toX, toY);
     }
 
